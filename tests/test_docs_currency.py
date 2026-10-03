@@ -23,6 +23,7 @@ from _manifest import REPO_ROOT
 RETIRED_TERMS: tuple[str, ...] = (
     "policy:configure",
     "thresholds:",
+    "the free one included",
 )
 
 #: Exact substrings of claims that stopped being true when the plan preflight moved

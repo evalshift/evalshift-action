@@ -612,6 +612,10 @@ an org may have in flight at once. (Private-repo CI is included on every plan; t
 still reports the repository's visibility.) Discovering one of those halfway through a
 suite means paying for the model calls and getting nothing, so the action asks first.
 
+An organization whose 30-day trial ended without a subscription is read-only: the preflight
+answers `402` with `feature: subscription`, and the job fails before the suite spends anything.
+Its runs stay readable in the web app.
+
 **What it does, before running your suite or spending a credit:**
 
 1. Reads `project: <org>/<project>` from your config file — the same key `evalshift push` uses.

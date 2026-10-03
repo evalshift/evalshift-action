@@ -1798,6 +1798,33 @@ def test_preflight_body_reports_a_quota_limit_and_its_reset_date() -> None:
     assert "2026-08-01" in body
 
 
+def test_preflight_body_renders_a_trial_ended_denial() -> None:
+    """v6: an expired trial is a 402 with no limit and no reset date — the body must still
+    say what happened and where to subscribe, without empty Limit/Resets lines."""
+    denial = action.PreflightDenied(
+        "The free trial for this organization ended on 2026-11-02. Subscribe to Pro to push "
+        "runs and keep the CI gate — existing runs stay readable.",
+        {
+            "feature": "subscription",
+            "tier": "pro",
+            "limit": None,
+            "used": None,
+            "resets_at": None,
+            "upgrade_url": "https://app.evalshift.dev/app/acme/settings/billing",
+            "access_state": "expired",
+            "trial_ends_at": "2026-11-02T10:00:00+00:00",
+        },
+    )
+
+    body = action.build_preflight_body(denial)
+
+    assert "ended on 2026-11-02" in body
+    assert "`subscription`" in body
+    assert "**Limit:**" not in body
+    assert "**Resets:**" not in body
+    assert "https://app.evalshift.dev/app/acme/settings/billing" in body
+
+
 def test_error_annotation_is_a_single_line() -> None:
     annotation = action.error_annotation("blocked\nupgrade here")
 

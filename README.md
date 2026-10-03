@@ -307,7 +307,9 @@ If the answer is a `402`, the job stops before any model credits are spent. You 
 `::error::` annotation, a step summary, and — on a pull request — the usual EvalShift comment
 carrying the server's message, the plan you're on, what was blocked, and an upgrade link. The
 usual cause is the monthly run quota; an unpaid subscription or more members than the plan's
-seats also stop it. Private-repo CI is included on every plan, the free one included.
+seats also stop it. Private-repo CI is included on every plan, the 30-day trial included. Once
+an org's trial ends without a subscription it is read-only, and the preflight stops the job with
+the server's message and a link to subscribe.
 
 The job also stops before the suite when the push would fail anyway: a token the server
 rejects (`401`), a key without `run:create` (`403`), or a project that doesn't exist while
