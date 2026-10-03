@@ -627,10 +627,10 @@ permission the upload needs anyway — so a key that can push can always ask, in
 pinned to that one project.
 
 **What the server checks** is every limit that would still refuse the upload once the suite has
-run: the org's subscription is paid up, the org is within its seats, the monthly run quota has
-a run left, the plan covers CI on a repository of this visibility, and one job fits under the
-parallelism cap. How many runs are in flight right now is not checked here — that changes by
-the second — and is enforced when the run is uploaded.
+run: the org is on an active trial or a paid-up subscription, the org is within its seats, the
+monthly run quota has a run left, the plan covers CI on a repository of this visibility, and one
+job fits under the parallelism cap. How many runs are in flight right now is not checked here —
+that changes by the second — and is enforced when the run is uploaded.
 
 **A 402 fails the job immediately.** You get, in three places:
 
@@ -948,8 +948,9 @@ gating still works — only the comment is lost.
 
 The [CI preflight](#plan-limits-and-the-ci-preflight) got a `402`: the org's plan doesn't cover
 this run. The annotation and the step summary name the limit and link to the billing page. The
-usual cause is the monthly run quota; an unpaid subscription or more members than the plan's
-seats are the others. Nothing was run and nothing was charged.
+usual cause is the monthly run quota; the org's 30-day trial having ended without a
+subscription, an unpaid subscription, or more members than the plan's seats are the others.
+Nothing was run and nothing was charged.
 
 ### `hosted EvalShift has no project '<org>/<project>' this token can reach (HTTP 404)`
 
