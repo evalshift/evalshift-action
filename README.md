@@ -343,7 +343,7 @@ skips.
 
 ## Versioning
 
-Pin to `@v0` to track the latest v0.x, or to an exact tag such as `@v0.6.1` for
+Pin to `@v0` to track the latest v0.x, or to an exact tag such as `@v0.6.2` for
 a fully reproducible workflow.
 
 ### How the pin is maintained
