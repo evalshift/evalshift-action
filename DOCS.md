@@ -5,7 +5,7 @@ request it runs the suite against both models, pushes the result to hosted EvalS
 it to the latest run on your base branch, and fails the check when your migration policy says
 the candidate is not safe to ship.
 
-- **Action ref:** `evalshift/evalshift-action@v0` · **version:** 0.6.1 · **License:** MIT
+- **Action ref:** `evalshift/evalshift-action@v0` · **version:** 0.6.2 · **License:** MIT
 - **Kind:** composite action — installs Python + the pinned EvalShift CLI, then runs a small
   stdlib-only helper script. Nothing is compiled, nothing is containerised.
 - **Pinned CLI:** `evalshift==1.2.1` by default, overridable.
@@ -612,6 +612,10 @@ an org may have in flight at once. (Private-repo CI is included on every plan; t
 still reports the repository's visibility.) Discovering one of those halfway through a
 suite means paying for the model calls and getting nothing, so the action asks first.
 
+An organization whose 30-day trial ended without a subscription is read-only: the preflight
+answers `402` with `feature: subscription`, and the job fails before the suite spends anything.
+Its runs stay readable in the web app.
+
 **What it does, before running your suite or spending a credit:**
 
 1. Reads `project: <org>/<project>` from your config file — the same key `evalshift push` uses.
@@ -623,10 +627,10 @@ permission the upload needs anyway — so a key that can push can always ask, in
 pinned to that one project.
 
 **What the server checks** is every limit that would still refuse the upload once the suite has
-run: the org's subscription is paid up, the org is within its seats, the monthly run quota has
-a run left, the plan covers CI on a repository of this visibility, and one job fits under the
-parallelism cap. How many runs are in flight right now is not checked here — that changes by
-the second — and is enforced when the run is uploaded.
+run: the org is on an active trial or a paid-up subscription, the org is within its seats, the
+monthly run quota has a run left, the plan covers CI on a repository of this visibility, and one
+job fits under the parallelism cap. How many runs are in flight right now is not checked here —
+that changes by the second — and is enforced when the run is uploaded.
 
 **A 402 fails the job immediately.** You get, in three places:
 
@@ -944,8 +948,9 @@ gating still works — only the comment is lost.
 
 The [CI preflight](#plan-limits-and-the-ci-preflight) got a `402`: the org's plan doesn't cover
 this run. The annotation and the step summary name the limit and link to the billing page. The
-usual cause is the monthly run quota; an unpaid subscription or more members than the plan's
-seats are the others. Nothing was run and nothing was charged.
+usual cause is the monthly run quota; the org's 30-day trial having ended without a
+subscription, an unpaid subscription, or more members than the plan's seats are the others.
+Nothing was run and nothing was charged.
 
 ### `hosted EvalShift has no project '<org>/<project>' this token can reach (HTTP 404)`
 
@@ -1016,7 +1021,7 @@ CI suite, or swap LLM-judge evaluators for structural ones in a CI-specific conf
 
 ## Versioning and stability
 
-Pin to `@v0` to track the latest v0.x, or to an exact tag such as `@v0.6.1` for a fully
+Pin to `@v0` to track the latest v0.x, or to an exact tag such as `@v0.6.2` for a fully
 reproducible workflow. The `evalshift-version` input pins the CLI separately — pin both if you
 want a workflow that behaves identically six months from now.
 

@@ -1,7 +1,7 @@
 # evalshift-action (GitHub Action) — complete reference for AI tools
 
 Canonical hosted copy: https://www.evalshift.dev/ci-llms-full.txt
-Repo/action ref: evalshift/evalshift-action | version: 0.6.1 | license: MIT
+Repo/action ref: evalshift/evalshift-action | version: 0.6.2 | license: MIT
 Kind: composite GitHub Action (not JavaScript, not Docker)
 Marketplace name: "EvalShift" | branding: bar-chart-2 / purple
 Runtime helper: scripts/evalshift_action.py (stdlib only, no third-party deps)
@@ -188,13 +188,16 @@ Sequence, before `evalshift all`:
 
 What the server checks, in order: records `repo_private` (sticky); `private_repo_ci`;
 declared `parallelism` vs `max_parallelism`; `runs_per_month` quota (same meter as `POST /runs`);
-subscription status and seat overage. In-flight uploads are NOT checked (upload-time only).
+subscription status (an active trial or a paid-up subscription) and seat overage. In-flight
+uploads are NOT checked (upload-time only).
 
 Outcomes (`run_preflight(hosted, *, project_ref, repo_private, create_project)`):
 - `2xx` → continue.
 - `402` → `PreflightDenied(message, details)`, job fails immediately with exit 1, `evalshift`
   never runs. `details` is the server's envelope: `feature`, `tier`, `limit`, `used`,
   `status`, `resets_at`, `upgrade_url`. The action renders it and decides nothing itself.
+- `402` + `feature: subscription` → the org's 30-day trial ended with no subscription
+  (read-only org); the job fails before the suite, message + upgrade URL as for any 402.
 - `401` → STOP: `hosted EvalShift at <host> rejected the token (HTTP 401): ...` plus key
   advice. Exit 1, `evalshift` never runs.
 - `403` → STOP: `hosted EvalShift refused the plan preflight (HTTP 403): ...` plus
@@ -733,9 +736,9 @@ non-zero.
 `cannot auto-create project: this token must have owner access to the org` → a service-account
 key cannot create projects; pre-create it and set `create-project: false`.
 Job failed before the CLI ran, with a plan message and an upgrade link → CI preflight got a
-402; the org's plan does not cover this run (usually the monthly run quota; otherwise an unpaid
-subscription or seat overage; private-repo CI is included on every plan). Nothing ran, nothing
-was charged.
+402; the org's plan does not cover this run (usually the monthly run quota; otherwise the org's
+30-day trial ended without a subscription, an unpaid subscription, or seat overage; private-repo
+CI is included on every plan). Nothing ran, nothing was charged.
 `hosted EvalShift at <host> rejected the token (HTTP 401)` before the CLI ran → preflight 401;
 same causes as any hosted 401. Nothing ran.
 `hosted EvalShift refused the plan preflight (HTTP 403)` → the key lacks `run:create`. Nothing
@@ -771,7 +774,7 @@ Costs higher than expected → the runner has a cold CLI cache every run; narrow
 
 ## Versioning
 
-`@v0` tracks the latest v0.x. `@v0.6.1` pins exactly. `evalshift-version` pins the CLI
+`@v0` tracks the latest v0.x. `@v0.6.2` pins exactly. `evalshift-version` pins the CLI
 independently of the action tag — pin both for a fully reproducible workflow.
 The `evalshift-version` default in `action.yml` is the single source of truth for the CLI pin;
 `tests/test_pin_consistency.py` fails on any stale mention elsewhere. The default is bumped by
