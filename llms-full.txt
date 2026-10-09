@@ -79,7 +79,7 @@ log until it completes.
 | config | no | evalshift.yaml | Path to config, relative to workspace root. Paths *inside* the config resolve relative to the config file's own directory (CLI behavior), so a config in a subdirectory works unchanged. |
 | suite | no | golden.jsonl | Path to golden JSONL suite, relative to workspace root. Selects the FILE only. Mutually exclusive with suite-name. |
 | suite-name | no | (empty) | `suites:` key in evalshift.yaml. Carries that suite's own evaluators block. Needs evalshift-version >= 0.14.0. Mutually exclusive with suite. |
-| evalshift-version | no | 1.3.0 | Exact CLI version installed from PyPI. Pinned for reproducibility. |
+| evalshift-version | no | 1.3.0 | Exact CLI version installed from PyPI. Pinned for reproducibility. Keep it >= the local CLI: evalshift.yaml is strict, so a key a newer CLI wrote (`captures:`, `migration_policy.max_invariant_violations`) fails to load on an older one. |
 | python-version | no | 3.12 | Python for the CLI. Must satisfy the CLI's `requires-python` (>=3.11 for 1.3.0); lowering it below that breaks install. |
 | fail-on | no | policy | `policy` \| `never` \| `regression` \| `any-slice-regression`. Any other value → hard error before any work. DEFAULT CHANGED: was `regression`; `policy` gates on the server's migration-policy verdict, not on the diff. |
 | require-policy | no | false | Whether `inconclusive` + `policy_source: "none"` (a run pushed with no `migration_policy`) fails the job. Default false: reported as ungated — a `::warning::` annotation on stdout and a commit status saying the gate is off — and the job still passes. Read under `fail-on: policy` only; it never overrides a verdict the policy did reach, and never the unavailable-check fallback. |
@@ -768,6 +768,10 @@ gets an answer (`inconclusive` + `policy_source: "none"`) and its own `::warning
 Two comments on one PR → two action invocations, or the marker comment fell off page 1 of the
 comments API.
 Job is silent for minutes → output is captured and printed per command, not streamed.
+`Invalid config: evalshift.yaml` + `<key>: Extra inputs are not permitted` for a config that loads
+locally → `evalshift-version` is older than the local CLI that wrote the config (strict schema;
+`captures:` and `migration_policy.max_invariant_violations` are the recent keys). Set the pin to
+the local `evalshift --version`; `evalshift doctor`'s `ci pin` row warns about the drift locally.
 Install fails on `evalshift==1.3.0` → `python-version` below the CLI's `requires-python` (3.11).
 Costs higher than expected → the runner has a cold CLI cache every run; narrow the trigger with
 `on.pull_request.paths`, or shrink the suite.

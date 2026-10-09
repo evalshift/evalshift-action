@@ -257,7 +257,7 @@ means a hung job.
 | `config` | no | `evalshift.yaml` | Path to your config, relative to the repository root. Paths *inside* the config (prompt files, tools) resolve relative to the config file's own directory, so a config in a subdirectory works. |
 | `suite` | no | `golden.jsonl` | Path to the golden JSONL suite, relative to the repository root. Selects a *file* and nothing else — see [Selecting a suite](#selecting-a-suite-name-vs-path). Mutually exclusive with `suite-name`. |
 | `suite-name` | no | — | Name of a suite wired under `suites:` in `evalshift.yaml`. Prefer this over `suite`. Needs `evalshift-version` >= `0.14.0`. See [Selecting a suite](#selecting-a-suite-name-vs-path). |
-| `evalshift-version` | no | `1.3.0` | Exact CLI version installed from PyPI. Pin this for run-to-run reproducibility across CLI releases. |
+| `evalshift-version` | no | `1.3.0` | Exact CLI version installed from PyPI. Pin this for run-to-run reproducibility across CLI releases. Keep it at least as new as the CLI you run locally: `evalshift.yaml` is strict, so a key a newer CLI wrote fails to load on an older one — see [Troubleshooting](#extra-inputs-are-not-permitted-for-a-key-in-evalshiftyaml-that-loads-locally). |
 | `python-version` | no | `3.12` | Python used to install and run the CLI. Must satisfy the CLI's minimum (3.11 for 1.3.0). |
 | `fail-on` | no | `policy` | Gating mode. See [below](#gating-the-fail-on-modes). |
 | `require-policy` | no | `false` | Whether a run pushed without a `migration_policy` fails the job. By default such a run merges, reported as ungated — a `::warning::` annotation and a commit status saying the gate is off. Read only under `fail-on: policy`. See [When no policy was pushed](#when-no-policy-was-pushed). |
@@ -1007,6 +1007,17 @@ the comments API on a long thread.
 
 It doesn't — output is buffered per command and printed when each finishes. A slow suite is
 silent while it runs.
+
+### `Extra inputs are not permitted` for a key in `evalshift.yaml` that loads locally
+
+The pinned `evalshift-version` is older than the CLI that wrote the config. `evalshift.yaml` is
+strict, so a key a newer CLI added — `captures:` and `migration_policy.max_invariant_violations`
+are the recent ones — is rejected by name by the older one: the CLI step prints
+`Invalid config: evalshift.yaml` with the offending key and the job ends in
+`command failed (1): evalshift all --yes ...`. Set `evalshift-version` to the version
+`evalshift --version` prints locally. The same drift shows up locally before it reaches CI:
+`evalshift doctor` adds a `ci pin` row naming the workflow and the pin to set, and
+`evalshift init --ci` pins the CLI that scaffolded the workflow.
 
 ### `pip install evalshift==1.3.0` fails
 
