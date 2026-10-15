@@ -1,7 +1,7 @@
 # evalshift-action (GitHub Action) — complete reference for AI tools
 
 Canonical hosted copy: https://www.evalshift.dev/ci-llms-full.txt
-Repo/action ref: evalshift/evalshift-action | version: 0.6.7 | license: MIT
+Repo/action ref: evalshift/evalshift-action | version: 0.6.8 | license: MIT
 Kind: composite GitHub Action (not JavaScript, not Docker)
 Marketplace name: "EvalShift" | branding: bar-chart-2 / purple
 Runtime helper: scripts/evalshift_action.py (stdlib only, no third-party deps)
@@ -79,8 +79,8 @@ log until it completes.
 | config | no | evalshift.yaml | Path to config, relative to workspace root. Paths *inside* the config resolve relative to the config file's own directory (CLI behavior), so a config in a subdirectory works unchanged. |
 | suite | no | golden.jsonl | Path to golden JSONL suite, relative to workspace root. Selects the FILE only. Mutually exclusive with suite-name. |
 | suite-name | no | (empty) | `suites:` key in evalshift.yaml. Carries that suite's own evaluators block. Needs evalshift-version >= 0.14.0. Mutually exclusive with suite. |
-| evalshift-version | no | 1.4.2 | Exact CLI version installed from PyPI. Pinned for reproducibility. Keep it >= the local CLI: evalshift.yaml is strict, so a key a newer CLI wrote (`captures:`, `migration_policy.max_invariant_violations`) fails to load on an older one. |
-| python-version | no | 3.12 | Python for the CLI. Must satisfy the CLI's `requires-python` (>=3.11 for 1.4.2); lowering it below that breaks install. |
+| evalshift-version | no | 1.4.3 | Exact CLI version installed from PyPI. Pinned for reproducibility. Keep it >= the local CLI: evalshift.yaml is strict, so a key a newer CLI wrote (`captures:`, `migration_policy.max_invariant_violations`) fails to load on an older one. |
+| python-version | no | 3.12 | Python for the CLI. Must satisfy the CLI's `requires-python` (>=3.11 for 1.4.3); lowering it below that breaks install. |
 | fail-on | no | policy | `policy` \| `never` \| `regression` \| `any-slice-regression`. Any other value → hard error before any work. DEFAULT CHANGED: was `regression`; `policy` gates on the server's migration-policy verdict, not on the diff. |
 | require-policy | no | false | Whether `inconclusive` + `policy_source: "none"` (a run pushed with no `migration_policy`) fails the job. Default false: reported as ungated — a `::warning::` annotation on stdout and a commit status saying the gate is off — and the job still passes. Read under `fail-on: policy` only; it never overrides a verdict the policy did reach, and never the unavailable-check fallback. |
 | branch | no | "" (auto) | Candidate branch recorded on the hosted run. Auto-detected; override only for non-standard naming. |
@@ -772,13 +772,13 @@ Job is silent for minutes → output is captured and printed per command, not st
 locally → `evalshift-version` is older than the local CLI that wrote the config (strict schema;
 `captures:` and `migration_policy.max_invariant_violations` are the recent keys). Set the pin to
 the local `evalshift --version`; `evalshift doctor`'s `ci pin` row warns about the drift locally.
-Install fails on `evalshift==1.4.2` → `python-version` below the CLI's `requires-python` (3.11).
+Install fails on `evalshift==1.4.3` → `python-version` below the CLI's `requires-python` (3.11).
 Costs higher than expected → the runner has a cold CLI cache every run; narrow the trigger with
 `on.pull_request.paths`, or shrink the suite.
 
 ## Versioning
 
-`@v0` tracks the latest v0.x. `@v0.6.7` pins exactly. `evalshift-version` pins the CLI
+`@v0` tracks the latest v0.x. `@v0.6.8` pins exactly. `evalshift-version` pins the CLI
 independently of the action tag — pin both for a fully reproducible workflow.
 The `evalshift-version` default in `action.yml` is the single source of truth for the CLI pin;
 `tests/test_pin_consistency.py` fails on any stale mention elsewhere. The default is bumped by
